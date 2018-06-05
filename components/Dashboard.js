@@ -13,6 +13,7 @@ import {
 import {observer} from 'mobx-react/native';
 import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
 import SegmentedControlTab from 'react-native-segmented-control-tab';
+import moment from 'moment';
 
 import dbHelper from '../utils/dbhelper';
 import VenvitoService from '../utils/venvitoservice';
@@ -21,42 +22,57 @@ import metricsDefinitions from '../utils/metricsdefinitions';
 import DashboardChart from './DashboardChart';
 
 @observer
-export default class Dashboarf extends Component
+export default class Dashboard extends Component
 {
-  store = observableStore;
-
-  periods = ['7', '30', 'M', 'Q']
-
+  store = observableStore; 
+  periods = ['7', '30', 'M', 'Q'];
+ 
   constructor(props)
   {
     super(props);
-    this.state = { selectedPeriodIndex: 0 };
+    this.state = { selectedPeriodIndex: 0, data: null };
   }
  
   componentDidMount()
   {
-  } 
+   } 
+
+  componentWillReceiveProps()
+  {
+  }
+
+  componentWillUnmount()
+  {
+  }
+
+  static getChartData()
+  {
+    VenvitoService.getChartData();
+  }
 
   handlePeriodChange(index)
   {
-    observableStore.chartPeriod = '';
-    
     this.setState(previousState =>
       {
         return { selectedPeriodIndex: index };
       },
       () =>
       {
-        observableStore.chartPeriod = this.periods[index];
+        this.store.chartPeriod = this.period();
+        Dashboard.getChartData();
       });
+  }
+
+  period()
+  {
+    return this.periods[this.state.selectedPeriodIndex];
   }
 
   dashboardChartList()
   {
-    const period = observableStore.chartPeriod;
-    VenvitoService.prepareChartPeriods(period);
-   
-    if (period == "")
+    const data = this.store.chartData;
+
+     if (data == null)
     {
       return (
         <Text style={styles.loading}>Loading...</Text>
@@ -64,10 +80,18 @@ export default class Dashboarf extends Component
     }
     else
     {
-      return (
+        return (
         metricsDefinitions.map(md => {
+          const index = data.findIndex(d => d.code == md.code);
+          const metricData = data[index].data;
+          const totalValue = data[index].totalValue;
+
           return (
-            <DashboardChart key={md.code} metricsDef={md} dummy={observableStore.metricValueUpdateCount}/>
+            <DashboardChart key={md.code} 
+                            metricsDef={md} 
+                            data={metricData}
+                            totalValue={totalValue}
+            />
           );
         })
       );
@@ -83,14 +107,23 @@ export default class Dashboarf extends Component
     }
   }
  
+  isVisible()
+  {
+    return (this.store.currentPage == 'dashboard');
+  }
+
   render() 
   {
-     return (
+    if (!this.isVisible())
+    return (<Text>Inactive</Text>);
+
+    return (
       <GestureRecognizer  style={{flex: 1}}
           onSwipeLeft={(state) => this.onSwipe(state, 1)}
           onSwipeRight={(state) => this.onSwipe(state, -1)}
       >      
         <View style={{flex: 1}}>
+   {/*       <Text>{this.store.getChartDataDuration}</Text> */}
           <ScrollView style={{flex: 1}}>
             {this.dashboardChartList()}
           </ScrollView>

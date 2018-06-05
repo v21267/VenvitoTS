@@ -77,7 +77,6 @@ export default class VenvitoService
 
     observableStore.maxCountWidth = 0;
     observableStore.data = newData;
-    observableStore.metricValueUpdateCount++;
   }
 
   static prepareChartPeriods(period)
@@ -85,8 +84,32 @@ export default class VenvitoService
     dbHelper.prepareChartPeriods(period);
   }
  
-  static getMetricsChart(md, period, callback)
+  static getChartData()
   {
-    dbHelper.getMetricsChart(md, period, callback);
+    const start = new Date().getTime();
+
+    const period = observableStore.chartPeriod;
+    VenvitoService.prepareChartPeriods(period);
+    observableStore.chartData = null;
+      
+     dbHelper.getMetricsChart(
+      result => 
+      {
+        const end = new Date().getTime();
+        const duration = end - start;
+        if (result.data)
+        {
+          observableStore.getChartDataDuration = duration;
+
+          observableStore.chartData = result.data;
+        }
+        else
+        {
+          console.error("Error in getMetricsChart: " + result.error);
+        }
+      }
+    );
+
   }
+
 }

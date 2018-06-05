@@ -1,6 +1,8 @@
 import SQLite from 'react-native-sqlite-storage';
 import moment from 'moment';
+
 import metricsDefinitions from '../utils/metricsdefinitions';
+import observableStore from '../utils/store';
 
 class DbHelper
 {
@@ -169,50 +171,67 @@ class DbHelper
     }
   }
 
-  getMetricsChart(md, period, callback)
+  getMetricsChart(callback)
   {
     this.openDb();
 
     this.m_DB.transaction((tx) =>
     {
+  
       tx.executeSql(
-        "SELECT cp.PERIOD_NAME, COALESCE(SUM(md.METRIC_VALUE), 0) AS TOTAL_VALUE " +
-//        ", cp.START_DATE, cp.END_DATE " +
+      
+        "SELECT def.METRIC_CODE, cp.PERIOD_NAME, COALESCE(SUM(md.METRIC_VALUE), 0) AS TOTAL_VALUE " +
         "FROM CHART_PERIOD cp " +
+        "CROSS JOIN METRIC_DEFINITION def " +
         "LEFT OUTER JOIN METRIC_DATA md ON md.DATE BETWEEN cp.START_DATE and cp.END_DATE " +
-        "                              AND md.METRIC_CODE = ? " +
-        "GROUP BY cp.START_DATE, cp.PERIOD_NAME " +
-        "ORDER BY cp.START_DATE",
-        [md.code],
+        "                              AND md.METRIC_CODE = def.METRIC_CODE " +
+        "GROUP BY def.METRIC_CODE, def.SORT_ORDER, cp.PERIOD_NAME " +
+        "ORDER BY def.SORT_ORDER, cp.START_DATE", 
+        null,
         (tx, result) =>
         {
-          const data = new Array();
+          const start = new Date().getTime();;
+     
+          const data = [];
           const count = result.rows.length;
           try
           {
-            let totalValue = 0;
-            let maxValue = 0;
+            let prevCode = "";
+            let metricData = null;
             for (let i = 0; i < count; i++)
             {
               let row = result.rows.item(i);
+              const code = row.METRIC_CODE;
+              if (code != prevCode || i == 0)
+              {
+                if (i > 0) 
+                {
+                  data.push(metricData);
+                }
+                prevCode = code;
+                metricData = { code: code, data: [], totalValue: 0 };
+              }
               const periodName = row.PERIOD_NAME;
               const value = row.TOTAL_VALUE;
-              totalValue += value;
-              if (value > maxValue) maxValue = value;
-              data.push({periodName, value/*, start: row.START_DATE, end: row.END_DATE*/});
+              metricData.totalValue += value;
+              metricData.data.push({periodName, value});
             }
-            callback({data, totalValue, maxValue});
+            data.push(metricData);
+
+            const end = new Date().getTime();;
+            const duration = end - start;
+
+            callback({data, end, duration});
           }
           catch(e)
           {
-            callback({error: JSON.stringify(e)});
+            callback({error: e.message});
           }
         },
         (err) =>
         {
           callback({error: err.message});
-        }
-      );
+        });
     });
   }
 

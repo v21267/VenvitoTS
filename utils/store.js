@@ -3,12 +3,14 @@ import VenvitoService from './venvitoservice';
 
 class ObservableStore 
 {
+  @observable currentPage = 'activity';
   @observable currentDate = VenvitoService.initialDate;
   @observable data = null;
   @observable maxCountWidth = 0;
   @observable chartPeriod = '7';
-  @observable metricValueUpdateCount = 0;
-}
+  @observable chartData = null;
+  @observable getChartDataDuration = 0;
+ }
 
 const observableStore = new ObservableStore();
 export default observableStore;

@@ -11,8 +11,10 @@ import {
 import { TabViewAnimated, TabBar, SceneMap } from 'react-native-tab-view';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+import observableStore from '../utils/store';
 import Activities from './Activities';
 import Dashboard from './Dashboard';
+import VenvitoService from '../utils/venvitoservice';
 
 const ios = (Platform.OS == 'ios');
 
@@ -38,7 +40,14 @@ export default class AppRoot extends Component {
     ],
   };
   
-  _handleIndexChange = index => this.setState({ index });
+  _handleIndexChange = index => {
+    this.setState({ index });
+    observableStore.currentPage = this.state.routes[index].key;
+    if (observableStore.currentPage == 'dashboard')
+    {
+      Dashboard.getChartData();
+    }
+  };
   
   _renderHeader = props => (
     <View style={styles.header}>

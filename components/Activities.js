@@ -56,9 +56,16 @@ export default class Activities extends Component
     VenvitoService.shiftDate(delta);
   }
  
+  isVisible()
+  {
+    return (this.store.currentPage == 'activity');
+  }
+
   render() 
   {
- 
+    if (!this.isVisible())
+    return (<Text>Inactive</Text>);
+
     return (
       <GestureRecognizer
         onSwipeLeft={(state) => this.onSwipe(state, 1)}

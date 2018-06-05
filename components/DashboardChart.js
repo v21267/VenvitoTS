@@ -6,6 +6,7 @@ import {
   View,
 } from 'react-native';
 import numeral from 'numeral';
+import moment from 'moment';
 import {observer} from 'mobx-react/native';
 import { VictoryBar, VictoryChart, VictoryAxis, VictoryLabel } from "victory-native";
 
@@ -14,75 +15,21 @@ import observableStore from '../utils/store';
 
 const ios = (Platform.OS == 'ios');
 
-@observer
 export default class DashboardChart extends Component 
 {
-  unmounted = false;
-
   constructor(props)
   {
     super(props);
-    this.state = { data: null, totalValue: 0, maxValue: 0 };
   }
 
   componentDidMount()
   {
-    this.getChartData();
   }
 
   componentWillUpdate()
   {
   }
 
-  componentWillReceiveProps(oldProps, newProps)
-  {
-    this.getChartData();
-  }
-
-  componentWillUnmount()
-  {
-    this.unmounted = true;
-  }
-
-  period()
-  {
-    return observableStore.chartPeriod;
-  }
-
-  getChartData()
-  {
-    if (this.period() == "")
-    {
-      this.setState(previousState => 
-        { 
-          return { data: null, totalValue: 0, maxValue: 0 };
-        });
-    }
-    else
-    {
-      VenvitoService.getMetricsChart(
-        this.props.metricsDef, this.props.period,
-        result => 
-        {
-          if (result.data)
-          {
-            if (!this.unmounted)
-            {
-              this.setState(previousState => 
-                { 
-                  return { ...result };
-                });
-            }
-          }
-          else
-          {
-            console.error("Error in getMetricsChart: " + result.err);
-          }
-        }
-      );
-    }
-  }
- 
   formatYAxisValue(md, value)
   {
     const suffix = ["", "k", "M", "G", "T", "P", "E"];
@@ -95,24 +42,30 @@ export default class DashboardChart extends Component
     return result;
   }
 
+  
   renderChart()
   {
     const md = this.props.metricsDef;
-    const period = this.period();
+    const data = this.props.data;
+    const totalValue = this.props.totalValue;
+
     let tickValues = null;
     
-    if (this.state.data && this.state.totalValue > 0)
+    if (data && totalValue > 0)
     {
-      const len = this.state.data.length;
+      const len = data.length;
       if (len == 30)
       {
         tickValues = [
-          this.state.data[0].periodName,
-          this.state.data[10].periodName,
-          this.state.data[20].periodName,
-          this.state.data[len - 1].periodName,
+          data[0].periodName,
+          data[10].periodName,
+          data[20].periodName,
+          data[len - 1].periodName,
         ];
       }
+      
+      const dataCopy = data.map(d => { return {...d}; });
+ //     console.error(JSON.stringify(dataCopy));
 
       return (
         <VictoryChart >
@@ -136,13 +89,13 @@ export default class DashboardChart extends Component
                           tickLabels: {fill: '#888888', fontSize: 12}
                         }}
           />
-          <VictoryBar data={this.state.data} x="periodName" y="value" 
+          <VictoryBar data={dataCopy} x="periodName" y="value" 
                       style={{ height: 60, data: { fill: md.color } }}
           />
         </VictoryChart>
      );
     }
-    else if (this.state.data && this.state.totalValue == 0)
+    else if (data && totalValue == 0)
     {
       return (
         <Text style={styles.loading}>No data for this period</Text>
@@ -160,8 +113,9 @@ export default class DashboardChart extends Component
   render() 
   {
     const md = this.props.metricsDef;
-    const period = this.period();
-    
+    const data = this.props.data;
+    const totalValue = this.props.totalValue;
+   
     return (
       <View style={styles.container} >
         <View style={styles.header}>
@@ -169,7 +123,7 @@ export default class DashboardChart extends Component
           <View style={styles.totalBadgeContainer}>
             <View style={styles.totalBadge}>
               <Text style={styles.totalValue}>
-                {(md.type == 'AMOUNT' ? '$' : '') + numeral(this.state.totalValue).format("0,0")}
+                {(md.type == 'AMOUNT' ? '$' : '') + numeral(totalValue).format("0,0")}
               </Text>
             </View>
           </View>
