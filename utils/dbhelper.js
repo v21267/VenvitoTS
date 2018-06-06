@@ -20,39 +20,50 @@ class DbHelper
 
   initTables()
   {
-    this.execSql(
-      "CREATE TABLE IF NOT EXISTS SYSTEM_SETTING " +
-      "(SETTING_KEY TEXT PRIMARY KEY, SETTING_VALUE TEXT);");
-    this.execSql(
-      "INSERT OR REPLACE INTO SYSTEM_SETTING " +
-      "(SETTING_KEY, SETTING_VALUE) " +
-      "VALUES ('DB_VERSION', '1');");
+    this.openDb();
 
-    this.execSql(
-      "CREATE TABLE IF NOT EXISTS METRIC_DEFINITION " +
-      "(METRIC_CODE TEXT NOT NULL, DESCRIPTION TEXT NOT NULL, METRIC_TYPE TEXT NOT NULL, " +
-      " COLOR TEXT NOT NULL, SORT_ORDER INTEGER NOT NULL," +
-      " PRIMARY KEY(METRIC_CODE));");
-    for (let i = 0; i < metricsDefinitions.length; i++)
+    this.m_DB.transaction((tx) =>
     {
-      const md = metricsDefinitions[i];
-      this.execSql(
-        "INSERT OR REPLACE INTO METRIC_DEFINITION " +
-        "(METRIC_CODE, DESCRIPTION, METRIC_TYPE, COLOR, SORT_ORDER) " +
-        "VALUES (?, ?, ?, ?, ?);",
-        [md.code, md.description, md.type, md.color, (i + 1) * 100]
-      );
-    }
+      this.execSqlWithTx(
+        tx,
+        "CREATE TABLE IF NOT EXISTS SYSTEM_SETTING " +
+        "(SETTING_KEY TEXT PRIMARY KEY, SETTING_VALUE TEXT);");
+      this.execSqlWithTx(
+        tx,
+        "INSERT OR REPLACE INTO SYSTEM_SETTING " +
+        "(SETTING_KEY, SETTING_VALUE) " +
+        "VALUES ('DB_VERSION', '1');");
 
-  this.execSql(
-    "CREATE TABLE IF NOT EXISTS METRIC_DATA " +
-    "(DATE TEXT NOT NULL, METRIC_CODE TEXT NOT NULL, METRIC_VALUE REAL NOT NULL, " +
-    " PRIMARY KEY(DATE, METRIC_CODE));");
+      this.execSqlWithTx(
+        tx,
+        "CREATE TABLE IF NOT EXISTS METRIC_DEFINITION " +
+        "(METRIC_CODE TEXT NOT NULL, DESCRIPTION TEXT NOT NULL, METRIC_TYPE TEXT NOT NULL, " +
+        " COLOR TEXT NOT NULL, SORT_ORDER INTEGER NOT NULL," +
+        " PRIMARY KEY(METRIC_CODE));");
+      for (let i = 0; i < metricsDefinitions.length; i++)
+      {
+        const md = metricsDefinitions[i];
+        this.execSqlWithTx(
+          tx,
+          "INSERT OR REPLACE INTO METRIC_DEFINITION " +
+          "(METRIC_CODE, DESCRIPTION, METRIC_TYPE, COLOR, SORT_ORDER) " +
+          "VALUES (?, ?, ?, ?, ?);",
+          [md.code, md.description, md.type, md.color, (i + 1) * 100]
+        );
+      }
 
-  this.execSql(
-    "CREATE TABLE IF NOT EXISTS CHART_PERIOD " +
-    "(START_DATE TEXT NOT NULL, END_DATE TEXT NOT NULL, PERIOD_NAME TEXT NOT NULL, " +
-    " PRIMARY KEY(START_DATE));");
+    this.execSqlWithTx(
+      tx,
+      "CREATE TABLE IF NOT EXISTS METRIC_DATA " +
+      "(DATE TEXT NOT NULL, METRIC_CODE TEXT NOT NULL, METRIC_VALUE REAL NOT NULL, " +
+      " PRIMARY KEY(DATE, METRIC_CODE));");
+
+    this.execSqlWithTx(
+      tx,
+      "CREATE TABLE IF NOT EXISTS CHART_PERIOD " +
+      "(START_DATE TEXT NOT NULL, END_DATE TEXT NOT NULL, PERIOD_NAME TEXT NOT NULL, " +
+      " PRIMARY KEY(START_DATE));");
+    });
   }
 
   getMetricsData(date, callback)
@@ -112,9 +123,9 @@ class DbHelper
     );
   }
 
-  prepareChartPeriods(dateRange)
+  prepareChartPeriods(tx, dateRange)
   { 
-    this.execSql("DELETE FROM CHART_PERIOD;");
+    this.execSqlWithTx(tx, "DELETE FROM CHART_PERIOD;");
 
     const totalDays = (dateRange == "7" || dateRange == "30" ? parseInt(dateRange) - 1 : 0);
     const endDate = moment();
@@ -162,7 +173,8 @@ class DbHelper
         periodEnd = moment(date).add(3, "months").add(-1, "days").format("YYYYMMDD");
       }
       
-      this.execSql(
+      this.execSqlWithTx(
+        tx, 
         "INSERT OR REPLACE INTO CHART_PERIOD " +
         "(START_DATE, END_DATE, PERIOD_NAME) " +
         "VALUES (?, ?, ?);",
@@ -171,13 +183,19 @@ class DbHelper
     }
   }
 
-  getMetricsChart(callback)
+  getMetricsChart(period, callback)
   {
     this.openDb();
-
+    const start = new Date().getTime();
+  
     this.m_DB.transaction((tx) =>
     {
-  
+      const createTran = new Date().getTime();
+
+      this.prepareChartPeriods(tx, period);
+
+      const preparePeriods = new Date().getTime();
+
       tx.executeSql(
       
         "SELECT def.METRIC_CODE, cp.PERIOD_NAME, COALESCE(SUM(md.METRIC_VALUE), 0) AS TOTAL_VALUE " +
@@ -190,8 +208,8 @@ class DbHelper
         null,
         (tx, result) =>
         {
-          const start = new Date().getTime();;
-     
+          const middle = new Date().getTime();;
+    
           const data = [];
           const count = result.rows.length;
           try
@@ -221,7 +239,7 @@ class DbHelper
             const end = new Date().getTime();;
             const duration = end - start;
 
-            callback({data, end, duration});
+            callback({data, duration, end, middle, start, preparePeriods, createTran});
           }
           catch(e)
           {
@@ -239,16 +257,21 @@ class DbHelper
   {
     this.openDb();
 
-    this.m_DB.transaction(async (tx) =>
+    this.m_DB.transaction(async (tx) => 
     {
-      await tx.executeSql(
-        sql, params, null,
-        (err) => 
-        {
-          const s = (name == null ? sql + (params != null ? "\n" + JSON.stringify(params) : "") : name);
-          console.error("SQL Error:\n" + s + "\n" + JSON.stringify(err));
-        });
+      await this.execSqlWithTx(tx, sql, params, name);
     });
+  }
+
+  async execSqlWithTx(tx, sql, params, name)
+  {
+    await tx.executeSql(
+      sql, params, null,
+      (err) => 
+      {
+        const s = (name == null ? sql + (params != null ? "\n" + JSON.stringify(params) : "") : name);
+        console.error("SQL Error:\n" + s + "\n" + JSON.stringify(err));
+      });
   }
 }
 

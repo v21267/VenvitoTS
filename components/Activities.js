@@ -64,7 +64,7 @@ export default class Activities extends Component
   render() 
   {
     if (!this.isVisible())
-    return (<Text>Inactive</Text>);
+    return (<Text>{"Inactive (Activities): " + this.store.currentPage}</Text>);
 
     return (
       <GestureRecognizer

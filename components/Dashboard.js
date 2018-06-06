@@ -80,9 +80,16 @@ export default class Dashboard extends Component
     }
     else
     {
-        return (
+      return (
         metricsDefinitions.map(md => {
           const index = data.findIndex(d => d.code == md.code);
+          if (index < 0) 
+          {
+            return (
+              <Text style={styles.loading}>{md.code + ' not found'}</Text>
+            );
+          }
+
           const metricData = data[index].data;
           const totalValue = data[index].totalValue;
 
@@ -115,7 +122,7 @@ export default class Dashboard extends Component
   render() 
   {
     if (!this.isVisible())
-    return (<Text>Inactive</Text>);
+       return (<Text>{"Inactive (Dashboard): " + this.store.currentPage}</Text>);
 
     return (
       <GestureRecognizer  style={{flex: 1}}
@@ -123,7 +130,7 @@ export default class Dashboard extends Component
           onSwipeRight={(state) => this.onSwipe(state, -1)}
       >      
         <View style={{flex: 1}}>
-   {/*       <Text>{this.store.getChartDataDuration}</Text> */}
+          <Text>{this.store.getChartDataDuration}</Text> 
           <ScrollView style={{flex: 1}}>
             {this.dashboardChartList()}
           </ScrollView>

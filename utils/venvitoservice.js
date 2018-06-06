@@ -86,19 +86,30 @@ export default class VenvitoService
  
   static getChartData()
   {
+    const init = new Date().getTime();
     const start = new Date().getTime();
-
+    
     const period = observableStore.chartPeriod;
-    VenvitoService.prepareChartPeriods(period);
     observableStore.chartData = null;
+    
       
-     dbHelper.getMetricsChart(
+    dbHelper.getMetricsChart(
+      period,
       result => 
       {
         const end = new Date().getTime();
         const duration = end - start;
         if (result.data)
         {
+/*          
+          this.logTime('Start', (start - init));
+          this.logTime('DbHelper Start', (result.start - start));
+          this.logTime('DbHelper CreateTran', (result.createTran - result.start));
+          this.logTime('DbHelper PreparePeriods', (result.preparePeriods - result.createTran));
+          this.logTime('DbHelper Middle', (result.middle - result.preparePeriods));
+          this.logTime('DbHelper End', (result.end - result.middle));
+          this.logTime('End', (end - result.end));
+*/          
           observableStore.getChartDataDuration = duration;
 
           observableStore.chartData = result.data;
@@ -109,7 +120,12 @@ export default class VenvitoService
         }
       }
     );
-
   }
-
+  
+  static logTime(name, time, threshold = 10)
+  {
+    if (time > threshold)
+      console.warn(name + ": " + time);
+  }
+ 
 }

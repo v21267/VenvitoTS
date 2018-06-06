@@ -33,7 +33,7 @@ const DashboardRoute = () => <Dashboard />;
 
 export default class AppRoot extends Component {
   state = {
-    index: 0,
+    index: observableStore.currentPageIndex,
     routes: [
       { key: 'activity', title: 'Activity' },
       { key: 'dashboard', title: 'Dashboard' },
@@ -41,7 +41,8 @@ export default class AppRoot extends Component {
   };
   
   _handleIndexChange = index => {
-    this.setState({ index });
+    this.setState({index: index});
+    observableStore.currentPageIndex = index;
     observableStore.currentPage = this.state.routes[index].key;
     if (observableStore.currentPage == 'dashboard')
     {

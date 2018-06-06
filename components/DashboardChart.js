@@ -63,12 +63,12 @@ export default class DashboardChart extends Component
           data[len - 1].periodName,
         ];
       }
-      
-      const dataCopy = data.map(d => { return {...d}; });
- //     console.error(JSON.stringify(dataCopy));
 
+      const dataCopy = data.map(d => { return {...d}; });
+  //    return (<Text>{JSON.stringify(dataCopy)}</Text>);
+  
       return (
-        <VictoryChart >
+        <VictoryChart>
           <VictoryAxis dependentAxis 
                         standalone={false}
                         tickLabelComponent={<VictoryLabel text={(d) => this.formatYAxisValue(md, d) + " "}/>}
@@ -115,6 +115,8 @@ export default class DashboardChart extends Component
     const md = this.props.metricsDef;
     const data = this.props.data;
     const totalValue = this.props.totalValue;
+
+  //  return (<Text>{JSON.stringify(data)}</Text>)
    
     return (
       <View style={styles.container} >

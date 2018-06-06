@@ -3,6 +3,7 @@ import VenvitoService from './venvitoservice';
 
 class ObservableStore 
 {
+  @observable currentPageIndex = 0;
   @observable currentPage = 'activity';
   @observable currentDate = VenvitoService.initialDate;
   @observable data = null;
