@@ -20,6 +20,7 @@ import VenvitoService from '../utils/venvitoservice';
 import observableStore from '../utils/store';
 import metricsDefinitions from '../utils/metricsdefinitions';
 import DashboardChart from './DashboardChart';
+import DashboardChart2 from './DashboardChart2';
 
 @observer
 export default class Dashboard extends Component
@@ -82,6 +83,7 @@ export default class Dashboard extends Component
     {
       return (
         metricsDefinitions.map(md => {
+//        metricsDefinitions.slice(0, 1).map(md => {
           const index = data.findIndex(d => d.code == md.code);
           if (index < 0) 
           {
@@ -94,7 +96,7 @@ export default class Dashboard extends Component
           const totalValue = data[index].totalValue;
 
           return (
-            <DashboardChart key={md.code} 
+            <DashboardChart2 key={md.code} 
                             metricsDef={md} 
                             data={metricData}
                             totalValue={totalValue}
@@ -107,6 +109,8 @@ export default class Dashboard extends Component
 
   onSwipe(gestureState, delta) 
   {
+    if (Math.abs(gestureState.dx) < Math.abs(gestureState.dy) * 2) return;
+
     let newPeriodIndex = this.state.selectedPeriodIndex + delta;
     if (newPeriodIndex >= 0 && newPeriodIndex < this.periods.length)
     {

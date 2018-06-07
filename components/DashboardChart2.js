@@ -8,14 +8,14 @@ import {
 import numeral from 'numeral';
 import moment from 'moment';
 import {observer} from 'mobx-react/native';
-import { VictoryBar, VictoryChart, VictoryAxis, VictoryLabel } from "victory-native";
+import { BarChart, Grid, XAxis, YAxis } from 'react-native-svg-charts';
 
 import VenvitoService from '../utils/venvitoservice';
 import observableStore from '../utils/store';
 
 const ios = (Platform.OS == 'ios');
 
-export default class DashboardChart extends PureComponent 
+export default class DashboardChart2 extends PureComponent 
 {
   constructor(props)
   {
@@ -53,47 +53,67 @@ export default class DashboardChart extends PureComponent
     
     if (data && totalValue > 0)
     {
+      
       const len = data.length;
-      if (len == 30)
-      {
-        tickValues = [
-          data[0].periodName,
-          data[10].periodName,
-          data[20].periodName,
-          data[len - 1].periodName,
-        ];
-      }
-
       const dataCopy = data.map(d => { return {...d}; });
-  //    return (<Text>{JSON.stringify(dataCopy)}</Text>);
+      const xValues = data.map((d, index) => 
+        { 
+          return (
+            len != 30 || index == 0 || index == 10 || index == 20 || index == len - 1 ? 
+            d.periodName : 
+            ''); 
+        });
+      const yValues = data.map(d => { return d.value; });
+
+      //    return (<Text>{JSON.stringify(dataCopy)}</Text>);
   
+      const fill = md.color;
+
+ /*     
+      const data2 = [ 50, 10, 40, 95, -4, -24, 85, 91, 35, 53, -53, 24, 50, -20, -80 ]
+
       return (
-        <VictoryChart>
-          <VictoryAxis dependentAxis 
-                        standalone={false}
-                        tickLabelComponent={<VictoryLabel text={(d) => this.formatYAxisValue(md, d) + " "}/>}
-                        offsetX={50}
-                        orientation="left"
-                        style={{
-                          axis: {stroke: "#EEEEEE"},
-                          grid: {stroke: () => "#EEEEEE"},
-                          tickLabels: {fill: '#888888', fontSize: 12, }
-                        }}
-          />
-          <VictoryAxis dependentAxis crossAxis
-                        standalone={false}
-                        tickValues={tickValues}
-                        orientation="bottom"
-                        style={{
-                          axis: {stroke: "#CCCCCC"},
-                          tickLabels: {fill: '#888888', fontSize: 12}
-                        }}
-          />
-          <VictoryBar data={dataCopy} x="periodName" y="value" 
-                      style={{ height: 60, data: { fill: md.color } }}
-          />
-        </VictoryChart>
-     );
+          <View style={{ height: 200, padding: 20 }}>
+              <BarChart
+                  style={{ flex: 1 }}
+                  data={data2}
+                   gridMin={ 0 }
+                  contentInset={{ top: 10, bottom: 10 }}
+                  svg={{ stroke: 'rgb(134, 65, 244)' }}
+              >
+                  <Grid/>
+              </BarChart>
+              <XAxis
+                  style={{ marginHorizontal: -10 }}
+                  data={ data2 }
+                  xAccessor={ ({item}) => item }
+                  formatLabel={ (value, index) => value }
+                  contentInset={{ left: 10, right: 10 }}
+                  svg={{ fontSize: 10, fill: 'black' }}
+              />
+          </View>);
+*/
+      return (
+          <View style={{ height: 300,  }}>
+            <BarChart
+                style={{ height: 260, paddingLeft: 20, paddingRight: 20 }}
+                data={ yValues }
+                svg={{ fill }}
+                gridMin={ 0 }
+                numberOfTicks={5}
+                spacingInner={0.7}
+                contentInset={{ top: 20, bottom: 20,  }}
+            >
+              <Grid svg={{ stroke: '#EEEEEE' }} />
+            </BarChart>
+            <XAxis
+                  data={ yValues }
+                  formatLabel={ (value, index) => xValues[index] }
+                  contentInset={{ left: 35, right: 35 }}
+                  svg={{ fontSize: 12, fill: '#888888', textAlign: 'center' }}
+            />
+          </View>
+        );
     }
     else if (data && totalValue == 0)
     {
@@ -147,7 +167,7 @@ function createStyles()
       paddingRight: 10,
       paddingBottom: 10,
       borderBottomWidth: 1,
-      borderBottomColor: '#EEEEEE',
+      borderBottomColor: '#BBBBBB',
       height: 330,
       flex: 1,
       flexDirection: 'column',

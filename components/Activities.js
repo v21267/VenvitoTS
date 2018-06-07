@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PureComponent } from 'react';
 import {
   Platform,
   StyleSheet,
@@ -53,6 +53,8 @@ export default class Activities extends Component
 
   onSwipe(gestureState, delta) 
   {
+    if (Math.abs(gestureState.dx) < Math.abs(gestureState.dy) * 2) return;
+    
     VenvitoService.shiftDate(delta);
   }
  

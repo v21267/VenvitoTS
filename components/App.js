@@ -4,7 +4,7 @@
  * @flow
  */
 
-import React, { Component } from 'react';
+import React, { Component, PureComponent } from 'react';
 import {
   Platform,
   StyleSheet,
@@ -14,7 +14,7 @@ import {
 import AppRoot from './AppRoot';
 
 
-export default class App extends Component {
+export default class App extends PureComponent {
   render() {
     return (
       <AppRoot></AppRoot>

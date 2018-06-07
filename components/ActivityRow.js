@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, PureComponent } from 'react';
 import {
   Platform,
   StyleSheet,
@@ -19,7 +19,7 @@ const ROW_HEIGHT = 60;
 
 const ios = (Platform.OS == 'ios');
 
-export default class ActivityRow extends Component 
+export default class ActivityRow extends PureComponent 
 {
   constructor(props)
   {
