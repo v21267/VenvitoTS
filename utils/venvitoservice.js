@@ -91,8 +91,7 @@ export default class VenvitoService
     
     const period = observableStore.chartPeriod;
     observableStore.chartData = null;
-    
-      
+        
     dbHelper.getMetricsChart(
       period,
       result => 

@@ -134,7 +134,7 @@ export default class Dashboard extends Component
           onSwipeRight={(state) => this.onSwipe(state, -1)}
       >      
         <View style={{flex: 1}}>
-          <Text>{this.store.getChartDataDuration}</Text> 
+ {/*         <Text>{this.store.getChartDataDuration}</Text> */}
           <ScrollView style={{flex: 1}}>
             {this.dashboardChartList()}
           </ScrollView>

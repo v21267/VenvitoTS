@@ -68,51 +68,43 @@ export default class DashboardChart2 extends PureComponent
       //    return (<Text>{JSON.stringify(dataCopy)}</Text>);
   
       const fill = md.color;
-
- /*     
-      const data2 = [ 50, 10, 40, 95, -4, -24, 85, 91, 35, 53, -53, 24, 50, -20, -80 ]
+      const padding = {paddingTop: 5, paddingBottom: 20, paddingRight: 0, paddingLeft: 10};
+      const xAxisLeftInset = (observableStore.chartPeriod == '7' ? 15 : 25);
+      const xAxisFontSize = (observableStore.chartPeriod == 'M' ? 10 : 12);
 
       return (
-          <View style={{ height: 200, padding: 20 }}>
+        <View style={{ height: 300, flexDirection: 'row' }}>
+          <YAxis
+                style={{flex: 0, height: 300, alignItems: 'flex-end',
+                        ...padding}}
+                data={ yValues }
+                formatLabel={ (value, index) => this.formatYAxisValue(md, value) }
+                svg={{ fontSize: 12, fill: '#888888', textAlign: 'right' }}
+                numberOfTicks={5}
+                min={0}
+                contentInset={{ top: 20, bottom: 35,  }}
+                />
+            <View style={{ height: 300, flexDirection: 'column', flex: 1,
+                           ...padding, paddingLeft: 0}}>
               <BarChart
-                  style={{ flex: 1 }}
-                  data={data2}
-                   gridMin={ 0 }
-                  contentInset={{ top: 10, bottom: 10 }}
-                  svg={{ stroke: 'rgb(134, 65, 244)' }}
+                  style={{ height: 260, paddingLeft: 10, paddingRight: 20 }}
+                  data={ yValues }
+                  svg={{ fill }}
+                  gridMin={ 0 }
+                  numberOfTicks={5}
+                  spacingInner={0.7}
+                  contentInset={{ top: 20, bottom: 20,  }}
               >
-                  <Grid/>
+                <Grid svg={{ stroke: '#EEEEEE' }} />
               </BarChart>
               <XAxis
-                  style={{ marginHorizontal: -10 }}
-                  data={ data2 }
-                  xAccessor={ ({item}) => item }
-                  formatLabel={ (value, index) => value }
-                  contentInset={{ left: 10, right: 10 }}
-                  svg={{ fontSize: 10, fill: 'black' }}
+                    data={ yValues }
+                    formatLabel={ (value, index) => xValues[index] }
+                    contentInset={{ left: xAxisLeftInset, right: 25 }}
+                    svg={{ fontSize: xAxisFontSize, fill: '#888888', textAlign: 'center' }}
               />
-          </View>);
-*/
-      return (
-          <View style={{ height: 300,  }}>
-            <BarChart
-                style={{ height: 260, paddingLeft: 20, paddingRight: 20 }}
-                data={ yValues }
-                svg={{ fill }}
-                gridMin={ 0 }
-                numberOfTicks={5}
-                spacingInner={0.7}
-                contentInset={{ top: 20, bottom: 20,  }}
-            >
-              <Grid svg={{ stroke: '#EEEEEE' }} />
-            </BarChart>
-            <XAxis
-                  data={ yValues }
-                  formatLabel={ (value, index) => xValues[index] }
-                  contentInset={{ left: 35, right: 35 }}
-                  svg={{ fontSize: 12, fill: '#888888', textAlign: 'center' }}
-            />
           </View>
+        </View>
         );
     }
     else if (data && totalValue == 0)
@@ -203,7 +195,7 @@ function createStyles()
 
     totalBadgeContainer:
     {
-      width: 100,
+      flex: 0,
       alignItems: 'flex-end',
      },
 

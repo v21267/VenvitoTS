@@ -183,7 +183,7 @@ function createStyles()
 
     totalBadgeContainer:
     {
-      width: 100,
+      flex: 0,
       alignItems: 'flex-end',
      },
 
