@@ -51,7 +51,7 @@ export default class Dashboard extends Component
     VenvitoService.getChartData();
   }
 
-  handlePeriodChange(index)
+  handlePeriodChange = (index) =>
   {
     this.setState(previousState =>
       {
@@ -117,6 +117,9 @@ export default class Dashboard extends Component
       this.handlePeriodChange(newPeriodIndex);
     }
   }
+
+  onSwipeLeft = (gestureState) => this.onSwipe(gestureState, 1);
+  onSwipeRight = (gestureState) => this.onSwipe(gestureState, -1);
  
   isVisible()
   {
@@ -129,9 +132,10 @@ export default class Dashboard extends Component
        return (<Text>{"Inactive (Dashboard): " + this.store.currentPage}</Text>);
 
     return (
-      <GestureRecognizer  style={{flex: 1}}
-          onSwipeLeft={(state) => this.onSwipe(state, 1)}
-          onSwipeRight={(state) => this.onSwipe(state, -1)}
+      <GestureRecognizer  
+        style={{flex: 1}}
+        onSwipeLeft={this.onSwipeLeft}
+        onSwipeRight={this.onSwipeRight}
       >      
         <View style={{flex: 1}}>
  {/*         <Text>{this.store.getChartDataDuration}</Text> */}
@@ -141,7 +145,7 @@ export default class Dashboard extends Component
           <SegmentedControlTab
             values={['LAST\n7 DAYS', 'LAST\n30 DAYS', 'THIS\nMONTH', 'THIS\nQUARTER']}
             selectedIndex={this.state.selectedPeriodIndex}
-            onTabPress={(index) => this.handlePeriodChange(index)}
+            onTabPress={this.handlePeriodChange}
             borderRadius={0}
             tabStyle={styles.periodTabStyles}
             activeTabStyle={styles.activePeriodTabStyles}

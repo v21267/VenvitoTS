@@ -52,7 +52,10 @@ export default class ActivityRow extends PureComponent
     this.calculateMaxCountWidth();
   }
 
-  editAmount()
+  increaseCount = () => this.updateCount(1);
+  decreaseCount = () => this.updateCount(-1);
+
+  editAmount = () =>
   {
     const d = this.props.data;
 
@@ -60,8 +63,8 @@ export default class ActivityRow extends PureComponent
       d.description.toUpperCase(),
       '',
       [
-       {text: 'Cancel', onPress: () => {}, style: 'cancel'},
-       {text: 'Save', onPress: (value) => this.handleAmountChange(value)},
+       {text: 'Cancel', style: 'cancel'},
+       {text: 'Save', onPress: this.handleAmountChange},
       ],
       {
         type: (ios ? 'plain-text' : 'numeric'),
@@ -73,7 +76,7 @@ export default class ActivityRow extends PureComponent
     // AlertIOS.prompt(title, message, callbackOrButtons, options.type, options.defaultValue, options.keyboardType);
   }
 
-  handleAmountChange(newValue)
+  handleAmountChange = (newValue) =>
   {
     const newAmount = parseInt(newValue);
     if (newAmount < 0) return;
@@ -125,10 +128,10 @@ export default class ActivityRow extends PureComponent
           <Text style={styles.countDescription}>{d.description}</Text>
         </View>
         <View style={styles.rightContainer}>
-          <TouchableHighlight onPress={() => this.updateCount(-1)} style={styles.button}>
+          <TouchableHighlight onPress={this.decreaseCount} style={styles.button}>
             <Icon name='minus' size={32} color="#009CDE"></Icon>
           </TouchableHighlight>
-          <TouchableHighlight onPress={() => this.updateCount(1)} style={styles.button}>
+          <TouchableHighlight onPress={this.increaseCount} style={styles.button}>
             <Icon name='plus' size={24} color="#009CDE"></Icon>
           </TouchableHighlight>
         </View>
@@ -148,7 +151,7 @@ export default class ActivityRow extends PureComponent
           <Text style={styles.amountValue}>{"$" + numeral(d.value).format("0,0")}</Text>
         </View>
         <View style={styles.rightContainerAmount}>
-          <TouchableHighlight style={styles.editButton} onPress={() => this.editAmount()}>
+          <TouchableHighlight style={styles.editButton} onPress={this.editAmount}>
             <Text style={styles.editButtonText}>EDIT</Text>
           </TouchableHighlight>
         </View>

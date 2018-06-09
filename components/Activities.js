@@ -57,6 +57,9 @@ export default class Activities extends Component
     
     VenvitoService.shiftDate(delta);
   }
+
+  onSwipeLeft = (gestureState) => this.onSwipe(gestureState, 1);
+  onSwipeRight = (gestureState) => this.onSwipe(gestureState, -1);
  
   isVisible()
   {
@@ -70,8 +73,8 @@ export default class Activities extends Component
 
     return (
       <GestureRecognizer
-        onSwipeLeft={(state) => this.onSwipe(state, 1)}
-        onSwipeRight={(state) => this.onSwipe(state, -1)}
+        onSwipeLeft={this.onSwipeLeft}
+        onSwipeRight={this.onSwipeRight}
       >
         <View styles={styles.container}>
           <DateSwitcher store={this.store}/>

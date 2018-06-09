@@ -30,8 +30,9 @@ export default class DashboardChart2 extends PureComponent
   {
   }
 
-  formatYAxisValue(md, value)
+  formatYAxisValue = (value) =>
   {
+    const md = this.props.metricsDef;
     const suffix = ["", "k", "M", "G", "T", "P", "E"];
     let index = 0;
     let dvalue = value;
@@ -42,7 +43,9 @@ export default class DashboardChart2 extends PureComponent
     return result;
   }
 
-  
+  xValues = [];
+  formatXAxisValue = (value, index) => this.xValues[index];
+
   renderChart()
   {
     const md = this.props.metricsDef;
@@ -56,7 +59,7 @@ export default class DashboardChart2 extends PureComponent
       
       const len = data.length;
       const dataCopy = data.map(d => { return {...d}; });
-      const xValues = data.map((d, index) => 
+      this.xValues = data.map((d, index) => 
         { 
           return (
             len != 30 || index == 0 || index == 10 || index == 20 || index == len - 1 ? 
@@ -78,7 +81,7 @@ export default class DashboardChart2 extends PureComponent
                 style={{flex: 0, height: 300, alignItems: 'flex-end',
                         ...padding}}
                 data={ yValues }
-                formatLabel={ (value, index) => this.formatYAxisValue(md, value) }
+                formatLabel={this.formatYAxisValue}
                 svg={{ fontSize: 12, fill: '#888888', textAlign: 'right' }}
                 numberOfTicks={5}
                 min={0}
@@ -99,7 +102,7 @@ export default class DashboardChart2 extends PureComponent
               </BarChart>
               <XAxis
                     data={ yValues }
-                    formatLabel={ (value, index) => xValues[index] }
+                    formatLabel={this.formatXAxisValue}
                     contentInset={{ left: xAxisLeftInset, right: 25 }}
                     svg={{ fontSize: xAxisFontSize, fill: '#888888', textAlign: 'center' }}
               />

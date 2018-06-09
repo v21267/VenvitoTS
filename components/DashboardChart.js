@@ -42,7 +42,6 @@ export default class DashboardChart extends PureComponent
     return result;
   }
 
-  
   renderChart()
   {
     const md = this.props.metricsDef;

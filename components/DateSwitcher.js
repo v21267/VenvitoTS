@@ -30,6 +30,9 @@ export default class DateSwitcher extends Component
     VenvitoService.shiftDate(delta);
   }
 
+  increaseDate = () => this.shiftDate(1);
+  decreaseDate = () => this.shiftDate(-1);
+
   get currentDate()
   {
     return new Date(this.props.store.currentDate);
@@ -54,11 +57,11 @@ export default class DateSwitcher extends Component
   render() {
     return (
       <View style={styles.container}>
-        <TouchableHighlight onPress={() => this.shiftDate(-1)} style={styles.button}>
+        <TouchableHighlight onPress={this.decreaseDate} style={styles.button}>
           <Icon name='caret-left' size={32} color="#009CDE"></Icon>
         </TouchableHighlight>
         <Text style={styles.dateCaption}>{this.currentDateCaption}</Text>
-        <TouchableHighlight onPress={() => this.shiftDate(1)} disabled={this.isToday} style={styles.button}>
+        <TouchableHighlight onPress={this.increaseDate} disabled={this.isToday} style={styles.button}>
           <Icon name='caret-right' size={32} color={this.isToday ? "#88CCFE" : "#009CDE"}></Icon>
         </TouchableHighlight>
       </View>
