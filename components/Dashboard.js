@@ -21,6 +21,11 @@ import observableStore from '../utils/store';
 import metricsDefinitions from '../utils/metricsdefinitions';
 import DashboardChart from './DashboardChart';
 import DashboardChart2 from './DashboardChart2';
+import {CHART_HEIGHT} from './DashboardChart2';
+
+const ios = (Platform.OS == 'ios');
+
+const USE_FLAT_LIST = !ios;
 
 @observer
 export default class Dashboard extends Component
@@ -36,7 +41,7 @@ export default class Dashboard extends Component
  
   componentDidMount()
   {
-   } 
+  } 
 
   componentWillReceiveProps()
   {
@@ -69,6 +74,42 @@ export default class Dashboard extends Component
     return this.periods[this.state.selectedPeriodIndex];
   }
 
+  keyExtractor = (item, index) => item.code;
+
+  getItemLayout = (item, index) => 
+  { 
+    return { length: CHART_HEIGHT, offset: CHART_HEIGHT * index, index };
+  }
+
+  renderChart = ({item}) =>
+  {
+    const md = item;
+    const data = this.store.chartData;
+
+ //   return <Text>{JSON.stringify(md)}</Text>
+
+    const index = data.findIndex(d => d.code == md.code);
+    if (index < 0) 
+    {
+      return (
+        <Text key={md.code} style={styles.loading}>{md.code + ' not found'}</Text>
+      );
+    }
+
+    const metricData = data[index].data;
+    const totalValue = data[index].totalValue;
+
+    return (
+      <View key={md.code}>
+        <DashboardChart2 
+          metricsDef={md} 
+          data={metricData}
+          totalValue={totalValue}
+        />
+      </View>
+    );
+}
+
   dashboardChartList()
   {
     const data = this.store.chartData;
@@ -76,35 +117,37 @@ export default class Dashboard extends Component
      if (data == null)
     {
       return (
-        <Text style={styles.loading}>Loading...</Text>
+        <View style={{flex: 1}}>
+          <Text style={styles.loading}>Loading...</Text>
+        </View>
       );
     }
-    else
+    else if (USE_FLAT_LIST)
     {
       return (
-        metricsDefinitions.map(md => {
-//        metricsDefinitions.slice(0, 1).map(md => {
-          const index = data.findIndex(d => d.code == md.code);
-          if (index < 0) 
-          {
-            return (
-              <Text style={styles.loading}>{md.code + ' not found'}</Text>
-            );
-          }
-
-          const metricData = data[index].data;
-          const totalValue = data[index].totalValue;
-
-          return (
-            <DashboardChart2 key={md.code} 
-                            metricsDef={md} 
-                            data={metricData}
-                            totalValue={totalValue}
-            />
-          );
-        })
+        <FlatList
+          style={{flex: 1}}
+          data={metricsDefinitions}
+          keyExtractor={this.keyExtractor}
+          renderItem={this.renderChart}
+          getItemLayout={this.getItemLayout}
+          initialNumToRender={2}
+        />
       );
-    }
+     }
+     else
+     {
+       return (
+        <ScrollView style={{flex: 1}}>
+          {
+            metricsDefinitions.map(md => {
+  //        metricsDefinitions.slice(0, 1).map(md => {
+              return this.renderChart({item: md});
+            })          
+          }
+        </ScrollView>
+       );
+     }
   }
 
   onSwipe(gestureState, delta) 
@@ -139,9 +182,7 @@ export default class Dashboard extends Component
       >      
         <View style={{flex: 1}}>
  {/*         <Text>{this.store.getChartDataDuration}</Text> */}
-          <ScrollView style={{flex: 1}}>
-            {this.dashboardChartList()}
-          </ScrollView>
+          {this.dashboardChartList()}
           <SegmentedControlTab
             values={['LAST\n7 DAYS', 'LAST\n30 DAYS', 'THIS\nMONTH', 'THIS\nQUARTER']}
             selectedIndex={this.state.selectedPeriodIndex}

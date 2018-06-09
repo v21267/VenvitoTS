@@ -15,6 +15,8 @@ import observableStore from '../utils/store';
 
 const ios = (Platform.OS == 'ios');
 
+export const CHART_HEIGHT = 330;
+
 export default class DashboardChart2 extends PureComponent 
 {
   constructor(props)
@@ -163,7 +165,7 @@ function createStyles()
       paddingBottom: 10,
       borderBottomWidth: 1,
       borderBottomColor: '#BBBBBB',
-      height: 330,
+      height: CHART_HEIGHT,
       flex: 1,
       flexDirection: 'column',
     },
