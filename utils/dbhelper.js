@@ -2,7 +2,6 @@ import SQLite from 'react-native-sqlite-storage';
 import moment from 'moment';
 
 import metricsDefinitions from '../utils/metricsdefinitions';
-import observableStore from '../utils/store';
 
 class DbHelper
 {

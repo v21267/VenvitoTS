@@ -29,7 +29,7 @@ export default class VenvitoService
     }
     LayoutAnimation.easeInEaseOut();
 
-    observableStore.currentDate = newDate;
+    observableStore.setCurrentDate(newDate);
     VenvitoService.getMetricsData(newDate);
   }
 
@@ -50,8 +50,8 @@ export default class VenvitoService
         {
           const data = result.data;
           data.forEach(element => {element.date = date});
-          observableStore.maxCountWidth = 0;
-          observableStore.data = data;
+          observableStore.setMaxCountWidth(0);
+          observableStore.setData(data);
         }
         else
         {
@@ -75,8 +75,8 @@ export default class VenvitoService
       return md;
     });
 
-    observableStore.maxCountWidth = 0;
-    observableStore.data = newData;
+    observableStore.setMaxCountWidth(0);
+    observableStore.setData(newData);
   }
 
   static prepareChartPeriods(period)
@@ -90,7 +90,7 @@ export default class VenvitoService
     const start = new Date().getTime();
     
     const period = observableStore.chartPeriod;
-    observableStore.chartData = null;
+    observableStore.setChartData(null);
         
     dbHelper.getMetricsChart(
       period,
@@ -109,9 +109,9 @@ export default class VenvitoService
           this.logTime('DbHelper End', (result.end - result.middle));
           this.logTime('End', (end - result.end));
 */          
-          observableStore.getChartDataDuration = duration;
+          observableStore.setGetChartDataDuration(duration);
 
-          observableStore.chartData = result.data;
+          observableStore.setChartData(result.data);
         }
         else
         {

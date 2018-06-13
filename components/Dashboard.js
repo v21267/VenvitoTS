@@ -64,7 +64,7 @@ export default class Dashboard extends Component
       },
       () =>
       {
-        this.store.chartPeriod = this.period();
+        this.store.setChartPeriod(this.period());
         Dashboard.getChartData();
       });
   }

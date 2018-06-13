@@ -42,8 +42,7 @@ export default class AppRoot extends Component {
   
   _handleIndexChange = index => {
     this.setState({index: index});
-    observableStore.currentPageIndex = index;
-    observableStore.currentPage = this.state.routes[index].key;
+    observableStore.setCurrentPage(index, this.state.routes[index].key);
     if (observableStore.currentPage == 'dashboard')
     {
       Dashboard.getChartData();
